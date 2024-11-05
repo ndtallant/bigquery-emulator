@@ -624,7 +624,7 @@ func (h *datasetsDeleteHandler) Handle(ctx context.Context, r *datasetsDeleteReq
 				return err
 			}
 		}
-		if err := r.server.contentRepo.DeleteTables(ctx, tx, r.project.ID, r.dataset.ID, r.dataset.TableIDs()); err != nil {
+		if err := r.server.contentRepo.DeleteTables(ctx, tx, r.project.ID, r.dataset.ID, r.dataset.Tables()); err != nil {
 			return fmt.Errorf("failed to delete tables: %w", err)
 		}
 	}
@@ -2456,7 +2456,7 @@ func (h *tablesDeleteHandler) Handle(ctx context.Context, r *tablesDeleteRequest
 		tx,
 		r.project.ID,
 		r.dataset.ID,
-		[]string{r.table.ID},
+		[]*metadata.Table{r.table},
 	); err != nil {
 		return fmt.Errorf("failed to delete table %s: %w", r.table.ID, err)
 	}
