@@ -442,7 +442,15 @@ func (r *Repository) DeleteTables(ctx context.Context, tx *connection.Tx, projec
 		if err != nil {
 			return fmt.Errorf("failed to delete table %s: %w", tablePath, err)
 		}
-		query := fmt.Sprintf("DROP %s `%s`", tableContent.Type, tablePath)
+		var query string
+		switch tableContent.Type {
+		case string(internaltypes.MaterializedViewTableType):
+			query = fmt.Sprintf("DROP MATERIALIZED VIEW `%s`", tablePath)
+		case string(internaltypes.DefaultTableType), string(internaltypes.ViewTableType):
+			query = fmt.Sprintf("DROP %s `%s`", tableContent.Type, tablePath)
+		default:
+			return fmt.Errorf("failed to delete table with unsupported table type: %s", tableContent.Type)
+		}
 		if _, err := tx.Tx().ExecContext(ctx, query); err != nil {
 			return fmt.Errorf("failed to delete table %s: %w", query, err)
 		}
